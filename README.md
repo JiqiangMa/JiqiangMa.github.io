@@ -30,7 +30,7 @@
         ├── avatar.svg               # 头像（首屏和侧边栏都用它）
         ├── favicon.svg              # 网站图标
         ├── hero-1..3.jpg            # 首屏壁纸兜底（接口挂了或断网时随机用一张）
-        ├── cover-1..12.jpg          # 文章封面池（每次刷新随机分配给卡片）
+        ├── covers/                   # ★ 封面池（当前 45 张，丢图进去即生效）
         ├── cover-fallback.svg       # 封面加载失败时的兜底图
         └── avatar-fallback.svg      # 头像加载失败时的兜底图
 ```
@@ -184,9 +184,9 @@ git push -u origin main
 要增删接口，改那个脚本顶部的 `RANDOM_IMG_APIS`。
 
 **文章封面怎么定的？**
-`_config.butterfly.yml` 的 `cover.default_cover` 是一个 12 张本地图的池子，刷新页面时脚本会重新洗牌分配。
+封面池就是 `source/img/covers/` 这个目录（当前 45 张），构建时脚本扫目录拿到清单，每次刷新页面都会重新随机分配。
 封面刻意不走接口：接口返回的是 1920x1080 大图（每张 0.5~1.4MB），一页 6 张卡片就是好几 MB。
-想加封面：图片丢进 `source/img/`，再往 `default_cover` 下面加一行。
+想加封面：把图丢进 `source/img/covers/`（jpg/png/webp 都行），提交推送后自动生效，不用改配置。
 
 **图标或样式偶尔加载不出来？**
 主题默认从 `cdn.jsdelivr.net` 取图标和脚本，国内经常不通。现在 Font Awesome 图标已经自托管在

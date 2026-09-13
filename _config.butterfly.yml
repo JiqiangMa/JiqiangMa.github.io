@@ -105,24 +105,18 @@ cover:
   index_enable: true
   aside_enable: true
   archives_enable: true
-  # 文章封面池（source/img/cover-1..12.jpg）。刷新页面时脚本会重新随机分配。
-  # 为什么写这么多条：主题按顺序取用，卡片之间才会各是各的图。
+  # 这里只是"脚本还没跑起来"时的初始封面；真正的封面池是 source/img/covers/ 目录（脚本扫目录自动拿）。
+  # 想加封面：把图丢进 source/img/covers/ 就行，不用改这里。
   # 只写一条的话所有卡片都是同一张图。
-  # 想加封面：图片丢进 source/img/，再在下面加一行即可。
+  # 想让某篇文章固定封面：在该文 front-matter 里写 cover: /img/covers/cover-07.jpg
   # 想让文章用固定封面：在文章 front-matter 里写 cover: /img/xxx.jpg
   default_cover:
-    - /img/cover-1.jpg
-    - /img/cover-2.jpg
-    - /img/cover-3.jpg
-    - /img/cover-4.jpg
-    - /img/cover-5.jpg
-    - /img/cover-6.jpg
-    - /img/cover-7.jpg
-    - /img/cover-8.jpg
-    - /img/cover-9.jpg
-    - /img/cover-10.jpg
-    - /img/cover-11.jpg
-    - /img/cover-12.jpg
+    - /img/covers/cover-01.jpg
+    - /img/covers/cover-02.jpg
+    - /img/covers/cover-03.jpg
+    - /img/covers/cover-04.jpg
+    - /img/covers/cover-05.jpg
+    - /img/covers/cover-06.jpg
 
 # Replace Broken Images
 error_img:

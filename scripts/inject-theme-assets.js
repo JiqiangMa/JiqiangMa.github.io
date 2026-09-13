@@ -64,6 +64,20 @@ const RANDOM_IMG_APIS = [
   'https://t.mwm.moe/pc'
 ];
 
+/* 封面池：source/img/covers/ 里的图，构建时扫目录拿到清单。
+   想加封面就往那个目录丢图（jpg/png/webp 都行），重新构建即可生效。 */
+function readCoverFiles() {
+  const dir = path.join(hexo.base_dir, 'source', 'img', 'covers');
+  try {
+    return fs.readdirSync(dir)
+      .filter(file => /\.(jpe?g|png|webp|avif|gif)$/i.test(file))
+      .sort()
+      .map(file => `/img/covers/${file}`);
+  } catch (err) {
+    hexo.log.warn(`[theme-assets] 读取封面目录失败 ${dir}：${err.message}`);
+    return [];
+  }
+}
 function randomImageScript(heroList, coverList) {
   return `<script id="hx-random-image">
 (function () {
@@ -140,8 +154,11 @@ hexo.extend.filter.register('after_render:html', function (html) {
 
   // ---- 4. 每次刷新随机换图 ----
   if (out.includes('</body>')) {
-    const covers = hexo.theme.config.cover && hexo.theme.config.cover.default_cover;
-    const coverList = Array.isArray(covers) ? covers : (covers ? [covers] : []);
+    const dirCovers = readCoverFiles();
+    const cfgCovers = hexo.theme.config.cover && hexo.theme.config.cover.default_cover;
+    const coverList = dirCovers.length
+      ? dirCovers
+      : (Array.isArray(cfgCovers) ? cfgCovers : (cfgCovers ? [cfgCovers] : []));
     out = out.replace('</body>', `${randomImageScript(HERO_FALLBACK, coverList)}\n</body>`);
   }
   return out;
