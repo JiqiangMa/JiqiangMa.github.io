@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="avatar">
+  <!-- 站点头像。显示时是圆形，所以内容都画在中心安全区内。
+       想换成自己的图：直接替换 source/img/avatar.svg 同名文件即可。 -->
+  <defs>
+    <linearGradient id="av-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFE7C7"/>
+      <stop offset="50%" stop-color="#FFBE8A"/>
+      <stop offset="100%" stop-color="#FE9600"/>
+    </linearGradient>
+    <linearGradient id="av-petal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#FFF3E6"/>
+    </linearGradient>
+    <radialGradient id="av-glow" cx="32%" cy="26%" r="62%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity=".65"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="200" height="200" fill="url(#av-bg)"/>
+  <circle cx="64" cy="52" r="86" fill="url(#av-glow)"/>
+
+  <!-- 五瓣樱花 -->
+  <g transform="translate(100 104) scale(1.7)" fill="url(#av-petal)">
+    <path d="M0 0 C -9 -10 -9 -26 0 -34 C 9 -26 9 -10 0 0 Z"/>
+    <path d="M0 0 C -9 -10 -9 -26 0 -34 C 9 -26 9 -10 0 0 Z" transform="rotate(72)"/>
+    <path d="M0 0 C -9 -10 -9 -26 0 -34 C 9 -26 9 -10 0 0 Z" transform="rotate(144)"/>
+    <path d="M0 0 C -9 -10 -9 -26 0 -34 C 9 -26 9 -10 0 0 Z" transform="rotate(216)"/>
+    <path d="M0 0 C -9 -10 -9 -26 0 -34 C 9 -26 9 -10 0 0 Z" transform="rotate(288)"/>
+    <circle cx="0" cy="0" r="5.5" fill="#FFD591"/>
+    <g stroke="#FE9600" stroke-width="1.4" stroke-linecap="round" opacity=".85">
+      <line x1="0" y1="0" x2="0" y2="-9"/>
+      <line x1="0" y1="0" x2="8.6" y2="-2.8"/>
+      <line x1="0" y1="0" x2="5.3" y2="7.3"/>
+      <line x1="0" y1="0" x2="-5.3" y2="7.3"/>
+      <line x1="0" y1="0" x2="-8.6" y2="-2.8"/>
+    </g>
+  </g>
+
+  <!-- 散落花瓣 -->
+  <g fill="#FFFFFF" opacity=".7">
+    <path d="M40 148 C 33 141 33 129 40 123 C 47 129 47 141 40 148 Z" transform="rotate(-20 40 135)"/>
+    <path d="M162 62 C 155 55 155 43 162 37 C 169 43 169 55 162 62 Z" transform="rotate(30 162 49)"/>
+  </g>
+</svg>

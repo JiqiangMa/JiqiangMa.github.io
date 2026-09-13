@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img" aria-label="cover">
+  <!-- 封面兜底图：外链的随机图加载失败时顶上，保证卡片永远不破相 -->
+  <defs>
+    <linearGradient id="cf-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFE3C8"/>
+      <stop offset="48%" stop-color="#FFC9A8"/>
+      <stop offset="100%" stop-color="#FFA98F"/>
+    </linearGradient>
+    <linearGradient id="cf-petal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity=".95"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity=".55"/>
+    </linearGradient>
+    <radialGradient id="cf-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity=".7"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="800" height="500" fill="url(#cf-bg)"/>
+  <circle cx="620" cy="120" r="200" fill="url(#cf-glow)"/>
+
+  <!-- 大朵樱花，压得很淡，只做质感和氛围 -->
+  <g transform="translate(400 300) scale(3.1)" opacity=".38">
+    <g fill="url(#cf-petal)">
+      <path d="M0 0 C -9 -10 -9 -26 0 -34 C 9 -26 9 -10 0 0 Z"/>
+      <path d="M0 0 C -9 -10 -9 -26 0 -34 C 9 -26 9 -10 0 0 Z" transform="rotate(72)"/>
+      <path d="M0 0 C -9 -10 -9 -26 0 -34 C 9 -26 9 -10 0 0 Z" transform="rotate(144)"/>
+      <path d="M0 0 C -9 -10 -9 -26 0 -34 C 9 -26 9 -10 0 0 Z" transform="rotate(216)"/>
+      <path d="M0 0 C -9 -10 -9 -26 0 -34 C 9 -26 9 -10 0 0 Z" transform="rotate(288)"/>
+    </g>
+    <circle cx="0" cy="0" r="4.5" fill="#FFD9A8"/>
+  </g>
+
+  <!-- 飘散的花瓣 -->
+  <g fill="#FFFFFF" opacity=".55">
+    <path d="M150 120 C 141 110 141 94 150 86 C 159 94 159 110 150 120 Z" transform="rotate(-18 150 103)"/>
+    <path d="M660 380 C 651 370 651 354 660 346 C 669 354 669 370 660 380 Z" transform="rotate(24 660 363)"/>
+    <path d="M250 400 C 241 390 241 374 250 366 C 259 374 259 390 250 400 Z" transform="rotate(42 250 383)"/>
+    <path d="M540 200 C 531 190 531 174 540 166 C 549 174 549 190 540 200 Z" transform="rotate(-34 540 183)"/>
+  </g>
+</svg>

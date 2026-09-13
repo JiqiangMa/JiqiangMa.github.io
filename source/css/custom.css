@@ -1,0 +1,882 @@
+/* ==========================================================================
+   Sakura 风格视觉层
+
+   参照 2heng.xin 的 Sakura 主题，提炼成 6 条规则：
+     1. 整屏大图当首屏，图片是随机的摄影壁纸（Picsum）；上面居中放圆形头像 + 站名
+     2. 大图底部压两层会缓慢横向漂移的波浪，把图"化"进下面的页面
+     3. 卡片是 10px 大圆角 + 很大很柔的投影，靠投影分层，不靠边框
+     4. 缩略图悬停时放大并旋转 5°，是这个主题最有辨识度的小动作
+     5. 强调色只有一个暖橙 #FE9600，用在链接、hover、滚动条上
+     6. 头像悬停转一圈
+
+   两处不那么显眼但要留意的：
+     - 波浪的形状是内联 SVG（见 --sak-wave-*），不依赖任何外链图片
+     - 壁纸和封面来自随机图接口，网络不通时靠 source/img/*-fallback.svg 兜底
+
+   结构由 _config.butterfly.yml 控制，这里只管长相。
+   由 scripts/inject-theme-assets.js 内联注入，与站点根路径无关。
+   ========================================================================== */
+
+:root {
+  /* 强调色。改这里的同时记得改 _config.butterfly.yml 的 theme_color.main，
+     两处一起改才能保证按钮、目录高亮和这里长得一样。 */
+  --sak-accent: #FE9600;
+  --sak-accent-hover: #E08600;
+  --sak-accent-soft: #FFF7E6;
+
+  --sak-ink: #3D3D3D;
+  --sak-ink-2: #504E4E;
+  --sak-ink-3: #888888;
+
+  --sak-bg: #F7F7F7;
+  --sak-surface: #FFFFFF;
+
+  --sak-radius: 10px;
+
+  /* Sakura 的精髓：投影又大又柔，卡片像浮在纸面上 */
+  --sak-shadow: 0 1px 20px -6px rgba(0, 0, 0, .28);
+  --sak-shadow-hover: 0 5px 16px 2px rgba(110, 110, 110, .28);
+
+  --sak-ease: cubic-bezier(.4, 0, .2, 1);
+
+  /* 波浪：两层错开相位，用 CSS 变量存整个 url()，
+     深色模式下换一份填充色即可，不用重写规则。 */
+  --sak-wave-1: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 60' preserveAspectRatio='none'%3E%3Cpath d='M0,30 C150,58 300,2 600,30 C900,58 1050,2 1200,30 L1200,60 L0,60 Z' fill='%23F7F7F7'/%3E%3C/svg%3E");
+  --sak-wave-2: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 60' preserveAspectRatio='none'%3E%3Cpath d='M0,32 C200,6 400,58 600,32 C800,6 1000,58 1200,32 L1200,60 L0,60 Z' fill='%23F7F7F7'/%3E%3C/svg%3E");
+}
+
+/* ---------------------------------------------------------------- 全局 */
+
+body {
+  background-color: var(--sak-bg);
+  color: var(--sak-ink-2);
+  font-size: 15px;
+  line-height: 1.85;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+               "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC",
+               "Noto Sans CJK SC", "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: #FFD591;
+  color: var(--sak-ink);
+}
+
+/* 滚动条也走主题色 */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--sak-accent);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--sak-accent-hover); background-clip: content-box; }
+
+/* ------------------------------------------------------- 首屏大图区域
+
+   结构：壁纸铺满整屏，上面居中一颗圆头像 + 站名胶囊，
+   底部两层波浪负责把大图"接"到下面的浅灰页面上。 */
+
+#page-header {
+  overflow: hidden;
+}
+
+#page-header.full_page {
+  height: 100vh;
+  background-attachment: fixed;
+}
+
+/* 波浪容器。主题没有这个功能，是 scripts/inject-theme-assets.js 插进来的 */
+.hx-waves {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 78px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.hx-wave {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-repeat: repeat-x;
+  background-position: 0 bottom;
+  will-change: background-position;
+}
+
+.hx-wave-1 {
+  height: 70px;
+  background-image: var(--sak-wave-1);
+  background-size: 1200px 70px;
+  opacity: .55;
+  animation: hx-wave-drift 11s linear infinite;
+}
+
+.hx-wave-2 {
+  height: 48px;
+  background-image: var(--sak-wave-2);
+  background-size: 1200px 48px;
+  animation: hx-wave-drift 7s linear infinite reverse;
+}
+
+@keyframes hx-wave-drift {
+  from { background-position-x: 0; }
+  to   { background-position-x: -1200px; }
+}
+
+/* 首屏头像：白圈 + 内阴影，悬停转一圈（参照站的招牌动作） */
+.hx-hero-avatar {
+  width: 108px;
+  height: 108px;
+  margin: 0 auto 20px;
+}
+
+.hx-hero-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #fff;
+  border: 5px solid rgba(255, 255, 255, .92);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, .55), 0 6px 24px rgba(0, 0, 0, .35);
+  transition: transform 1s var(--sak-ease);
+}
+
+.hx-hero-avatar img:hover { transform: rotate(360deg); }
+
+/* 站名做成半透明黑胶囊，压在随机壁纸上才保证看得清。
+
+   两处必须一起改，否则胶囊不会居中：
+   - #site-info 本身没有 text-align，而下面的 #site-title 要从
+     主题的 display:-webkit-box（.limit-more-line）改成 inline-block，
+     变成行内盒后就只能靠父元素的 text-align 居中。
+   - 所以先让父元素居中，再改子元素。 */
+#page-header.full_page #site-info { text-align: center; }
+
+#page-header.full_page #site-title {
+  display: inline-block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+  padding: 6px 26px;
+  border-radius: var(--sak-radius);
+  background: rgba(0, 0, 0, .42);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  font-size: 1.9em;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, .4);
+}
+
+#page-header.full_page #site-subtitle {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 4px 18px;
+  border-radius: var(--sak-radius);
+  background: rgba(0, 0, 0, .3);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  color: #FAFAFA;
+  font-size: .95em;
+  letter-spacing: .06em;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, .4);
+}
+
+/* 向下的小箭头：压在波浪上面，不然会被水纹糊掉 */
+#page-header.full_page #scroll-down {
+  z-index: 6;
+}
+
+#page-header.full_page #scroll-down .scroll-down-effects {
+  color: rgba(255, 255, 255, .92);
+}
+
+/* 普通页（归档 / 标签 / 分类 / 关于）的页标题 */
+#page-header.not-home-page #page-site-info #site-title {
+  text-shadow: 0 2px 10px rgba(0, 0, 0, .5);
+}
+
+/* ------------------------------------------------------------ 顶部导航栏
+
+   大图上导航是透明的白字；往下滚之后变成半透明白条 + 毛玻璃。 */
+
+#nav {
+  font-size: 15px;
+  padding: 0 32px;
+  transition: background .3s var(--sak-ease), box-shadow .3s var(--sak-ease);
+}
+
+#nav a,
+#nav span.site-page {
+  text-shadow: none !important;
+  transition: color .2s var(--sak-ease);
+}
+
+/* 大图上：白字，hover 走橙色 */
+#page-header.full_page #nav a,
+#page-header.full_page #nav span.site-page,
+#page-header.post-bg #nav a,
+#page-header.post-bg #nav span.site-page,
+#page-header.not-home-page #nav a,
+#page-header.not-home-page #nav span.site-page {
+  color: rgba(255, 255, 255, .92) !important;
+}
+
+#page-header.full_page #nav a:hover,
+#page-header.full_page #nav span.site-page:hover,
+#page-header.post-bg #nav a:hover,
+#page-header.post-bg #nav span.site-page:hover,
+#page-header.not-home-page #nav a:hover,
+#page-header.not-home-page #nav span.site-page:hover {
+  color: var(--sak-accent) !important;
+}
+
+#page-header.full_page #nav .site-name,
+#page-header.post-bg #nav .site-name,
+#page-header.not-home-page #nav .site-name {
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: .03em;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, .45) !important;
+}
+
+/* 滚动后的吸顶导航：半透明白 + 毛玻璃 + 橙色 hover */
+#page-header.nav-fixed #nav,
+#page-header.not-top-img #nav {
+  background: rgba(255, 255, 255, .9) !important;
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  backdrop-filter: saturate(180%) blur(12px);
+  box-shadow: 0 1px 10px rgba(0, 0, 0, .08) !important;
+}
+
+#page-header.nav-fixed #nav a,
+#page-header.nav-fixed #nav span.site-page,
+#page-header.not-top-img #nav a,
+#page-header.not-top-img #nav span.site-page {
+  color: var(--sak-ink-2) !important;
+}
+
+#page-header.nav-fixed #nav a:hover,
+#page-header.nav-fixed #nav span.site-page:hover,
+#page-header.not-top-img #nav a:hover,
+#page-header.not-top-img #nav span.site-page:hover {
+  color: var(--sak-accent) !important;
+}
+
+#page-header.nav-fixed #nav .site-name,
+#page-header.not-top-img #nav .site-name {
+  color: var(--sak-ink);
+  font-weight: 600;
+}
+
+/* 二级下拉 */
+#nav .menus_items .menus_item { padding: 0 0 0 20px; }
+
+#nav .menus_items .menus_item .menus_item_child {
+  margin-top: 10px;
+  border-radius: var(--sak-radius);
+  border: 1px solid rgba(0, 0, 0, .06);
+  box-shadow: 0 6px 24px -8px rgba(0, 0, 0, .28);
+}
+
+#nav .menus_items .menus_item .menus_item_child li a { color: var(--sak-ink-2) !important; }
+#nav .menus_items .menus_item .menus_item_child li a:hover { color: var(--sak-accent) !important; }
+
+#content-inner { padding-top: 32px; padding-bottom: 44px; }
+
+/* --------------------------------------------------------- 首页文章卡片
+
+   注意：#recent-posts 和 .recent-post-item 之间还有一层 .recent-post-items，
+   所以只能用后代选择器，写成 "#recent-posts > .recent-post-item" 一条都不匹配。 */
+
+#recent-posts .recent-post-item {
+  margin-bottom: 24px;
+  border-radius: var(--sak-radius);
+  background: var(--sak-surface);
+  box-shadow: var(--sak-shadow);
+  border: none;
+  transition: box-shadow .3s var(--sak-ease);
+}
+
+#recent-posts .recent-post-item:hover { box-shadow: var(--sak-shadow-hover); }
+
+/* 缩略图：悬停放大并旋转 5°，这是 Sakura 最有辨识度的一个动作 */
+#recent-posts .recent-post-item .post-bg {
+  transition: transform .6s var(--sak-ease);
+  transform-origin: center;
+}
+
+#recent-posts .recent-post-item:hover .post-bg {
+  transform: scale(1.2) rotate(5deg);
+}
+
+#recent-posts .recent-post-item .post_cover { overflow: hidden; }
+
+#recent-posts .recent-post-item .recent-post-info {
+  padding: 0 34px;
+}
+
+#recent-posts .recent-post-item .article-title {
+  color: var(--sak-ink-2);
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.5;
+  transition: color .2s var(--sak-ease);
+}
+
+#recent-posts .recent-post-item:hover .article-title { color: var(--sak-accent); }
+
+#recent-posts .recent-post-item .article-meta-wrap,
+#recent-posts .recent-post-item .article-meta-wrap a,
+#recent-posts .recent-post-item .article-meta-wrap time {
+  color: var(--sak-ink-3);
+  font-size: .8rem;
+}
+
+#recent-posts .recent-post-item .article-meta-wrap a:hover { color: var(--sak-accent); }
+
+#recent-posts .recent-post-item .content {
+  color: var(--sak-ink-3);
+  font-size: .88rem;
+  line-height: 1.8;
+}
+
+/* ------------------------------------------------------------ 侧边栏卡片 */
+
+#aside-content .card-widget {
+  border-radius: var(--sak-radius);
+  background: var(--sak-surface);
+  box-shadow: var(--sak-shadow);
+  border: none;
+}
+
+#aside-content .item-headline {
+  color: var(--sak-ink-2);
+  font-weight: 600;
+}
+
+/* 侧栏标题左边那道橙色小竖条，和正文的标题呼应 */
+#aside-content .item-headline::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: .95em;
+  margin-right: .5rem;
+  border-radius: 2px;
+  background: var(--sak-accent);
+  vertical-align: -.08em;
+}
+
+#aside-content .card-info .author-info__name {
+  color: var(--sak-ink);
+  font-weight: 600;
+}
+
+#aside-content .card-info .author-info__description { color: var(--sak-ink-3); }
+
+/* 侧栏头像同样是圆形 + 悬停转一圈，和首屏那颗一致 */
+#aside-content .card-info .avatar-img img {
+  border: 4px solid #fff;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, .18);
+  transition: transform 1s var(--sak-ease);
+}
+
+#aside-content .card-info .avatar-img img:hover { transform: rotate(360deg); }
+
+#aside-content .card-announcement .announcement_content {
+  color: var(--sak-ink-2);
+  font-size: .88rem;
+}
+
+#aside-content .card-categories .category-list a,
+#aside-content .card-archives .card-archive-list a {
+  color: var(--sak-ink-2);
+  font-size: .88rem;
+  transition: color .2s var(--sak-ease);
+}
+
+#aside-content .card-categories .category-list a:hover,
+#aside-content .card-archives .card-archive-list a:hover { color: var(--sak-accent); }
+
+#aside-content .card-categories .category-list-count,
+#aside-content .card-archives .card-archive-list-count { color: var(--sak-ink-3); }
+
+/* -------------------------------------------------------------- 文章页
+
+   #post-info（标题 + 元信息）和 #article-container（正文）是兄弟节点，
+   让它们共用一张白卡片。 */
+
+#post {
+  padding: 34px 40px 40px;
+  border-radius: var(--sak-radius);
+  background: var(--sak-surface);
+  box-shadow: var(--sak-shadow);
+}
+
+#post > #post-info {
+  margin-bottom: 26px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #EFEFEF;
+}
+
+/* #post-info 有两种落点，颜色必须分开写，不能只写一条 #post-info：
+     A. 开着顶图（本站默认）——post-info 在 <header> 里压在壁纸上，主题给的白字
+     B. 关掉顶图 ——post-info 落到正文卡片里，需要深色
+   主题基础的 `#post-info .post-title { color: var(--white) }` 两种情况都会命中，
+   所以下面用 #page-header / #post> 前缀把优先级提上去，各管各的。 */
+
+#post-info .post-title {
+  /* 主题给标题套了 .limit-more-line（-webkit-box + 三行截断），这里要完整显示 */
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.45;
+}
+
+/* A. 压在大图上：白字 + 阴影才看得清 */
+#page-header #post-info .post-title {
+  margin-bottom: 14px;
+  color: #fff;
+  font-size: 2.1rem;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, .55);
+}
+
+#page-header #post-info #post-meta,
+#page-header #post-info #post-meta a,
+#page-header #post-info #post-meta time,
+#page-header #post-info #post-meta .post-meta-label {
+  color: rgba(255, 255, 255, .85);
+  font-size: .8rem;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, .5);
+}
+
+#page-header #post-info #post-meta a:hover { color: var(--sak-accent); }
+#page-header #post-info #post-meta .post-meta-separator { color: rgba(255, 255, 255, .5); }
+
+/* B. 落在正文卡片里：深色 */
+#post > #post-info .post-title {
+  margin-bottom: 12px;
+  color: var(--sak-ink);
+  font-size: 1.7rem;
+}
+
+#post > #post-info #post-meta,
+#post > #post-info #post-meta a,
+#post > #post-info #post-meta time,
+#post > #post-info #post-meta .post-meta-label {
+  color: var(--sak-ink-3);
+  font-size: .8rem;
+  text-shadow: none;
+}
+
+#post > #post-info #post-meta a:hover { color: var(--sak-accent); }
+#post > #post-info #post-meta .post-meta-separator { color: #DDD; }
+
+/* 正文不再自带白底和内边距——外面已经是卡片了 */
+#article-container {
+  background: transparent;
+  padding: 0;
+  color: var(--sak-ink-2);
+  font-size: 1rem;
+  line-height: 1.9;
+  box-shadow: none;
+}
+
+#article-container p { margin: 0 0 18px; }
+
+#article-container h1,
+#article-container h2,
+#article-container h3,
+#article-container h4,
+#article-container h5,
+#article-container h6 {
+  color: var(--sak-ink);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+#article-container h1 { font-size: 1.55rem; margin: 1.6em 0 .8em; }
+#article-container h2 { font-size: 1.3rem; margin: 1.8em 0 .9em; }
+#article-container h3 { font-size: 1.12rem; margin: 1.6em 0 .7em; }
+#article-container h4 { font-size: 1rem; margin: 1.4em 0 .6em; }
+
+/* 二级标题：左边一道橙色小竖条 */
+#article-container h2 {
+  position: relative;
+  padding-left: .8rem;
+}
+
+#article-container h2::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: .32em;
+  width: 4px;
+  height: .95em;
+  border-radius: 2px;
+  background: var(--sak-accent);
+}
+
+#article-container a {
+  color: var(--sak-accent);
+  text-decoration: none;
+  transition: color .2s var(--sak-ease);
+}
+
+#article-container a:hover {
+  color: var(--sak-accent-hover);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* 行内代码：暖白底 + 橙褐字 */
+#article-container code:not([class*="hljs"]):not(.hljs) {
+  margin: 0 .15em;
+  padding: .18em .45em;
+  border-radius: 6px;
+  background: #FFF7E6;
+  color: #C1660A;
+  font-size: .88em;
+  overflow-wrap: break-word;
+}
+
+/* 代码块 */
+figure.highlight,
+.code-area {
+  border-radius: var(--sak-radius);
+  border: 1px solid #EFEFEF;
+  box-shadow: 0 1px 10px -4px rgba(0, 0, 0, .18);
+  overflow: hidden;
+}
+
+figure.highlight table,
+.code-area table { margin: 0; }
+
+/* 引用块 */
+#article-container blockquote {
+  margin: 0 0 18px;
+  padding: .9rem 1.3rem;
+  border-left: 4px solid var(--sak-accent);
+  border-radius: 0 var(--sak-radius) var(--sak-radius) 0;
+  background: #FFFBF2;
+  color: var(--sak-ink-2);
+}
+
+#article-container blockquote p:last-child { margin-bottom: 0; }
+
+/* 表格 */
+#article-container table {
+  border-radius: var(--sak-radius);
+  overflow: hidden;
+  border: 1px solid #EFEFEF;
+}
+
+#article-container table thead {
+  background: #FFF7E6;
+  color: var(--sak-ink);
+}
+
+#article-container table th,
+#article-container table td { border-color: #EFEFEF; padding: 9px 13px; }
+
+#article-container table tbody tr { transition: background .15s var(--sak-ease); }
+#article-container table tbody tr:hover { background: #FFFBF2; }
+
+#article-container img {
+  border-radius: var(--sak-radius);
+  box-shadow: 0 2px 12px -4px rgba(0, 0, 0, .22);
+}
+
+#article-container hr { border-color: #EFEFEF; background: #EFEFEF; }
+
+#article-container ul,
+#article-container ol { padding-left: 1.3em; margin: 0 0 18px; }
+#article-container li { margin: 0 0 .4em; }
+
+/* ------------------------------------------------- 文章底部：版权 / 标签 */
+
+#post .post-copyright {
+  margin: 30px 0 0;
+  padding: 16px 20px;
+  border: none;
+  border-left: 4px solid var(--sak-accent);
+  border-radius: 0 var(--sak-radius) var(--sak-radius) 0;
+  background: #FFFBF2;
+  color: var(--sak-ink-2);
+  font-size: .85rem;
+}
+
+#post .post-copyright a { color: var(--sak-accent); }
+#post .post-copyright__type a { word-break: break-all; }
+
+/* 底部标签 */
+#post .tag_share .post-meta__tags,
+#article-container .tag-link {
+  display: inline-block;
+  margin: 6px 8px 6px 0;
+  padding: 3px 12px;
+  border: 1px solid #FFE0B2;
+  border-radius: 999px;
+  background: #FFFBF2;
+  color: var(--sak-ink-2) !important;
+  font-size: .8rem;
+  transition: all .2s var(--sak-ease);
+}
+
+#post .tag_share .post-meta__tags:hover,
+#article-container .tag-link:hover {
+  border-color: var(--sak-accent);
+  background: var(--sak-accent);
+  color: #fff !important;
+}
+
+/* ------------------------------------------------------ 标签 / 分类页面 */
+
+.tag-cloud a,
+.category-list a,
+#page .category-list a,
+#page .tag-cloud a {
+  border-radius: 999px !important;
+  border: 1px solid #FFE0B2 !important;
+  background: var(--sak-surface);
+  color: var(--sak-ink-2) !important;
+  font-size: .88rem;
+  transition: all .2s var(--sak-ease);
+}
+
+.tag-cloud a:hover,
+.category-list a:hover,
+#page .category-list a:hover,
+#page .tag-cloud a:hover {
+  border-color: var(--sak-accent) !important;
+  background: var(--sak-accent) !important;
+  color: #fff !important;
+  transform: translateY(-2px);
+}
+
+#page .category-list-count,
+#page .tag-cloud-count { color: var(--sak-ink-3); }
+
+/* 独立页面（关于 / 标签 / 分类）也包成白卡片 */
+#page {
+  padding: 34px 40px 40px;
+  border-radius: var(--sak-radius);
+  background: var(--sak-surface);
+  box-shadow: var(--sak-shadow);
+}
+
+#page .page-title {
+  position: relative;
+  margin: 0 0 24px;
+  padding-left: .8rem;
+  color: var(--sak-ink);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+#page .page-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: .32em;
+  width: 4px;
+  height: .95em;
+  border-radius: 2px;
+  background: var(--sak-accent);
+}
+
+/* ------------------------------------------------------------------ 目录 */
+
+#card-toc .toc-link { color: var(--sak-ink-2); font-size: .85rem; }
+#card-toc .toc-link:hover { color: var(--sak-accent); }
+
+#card-toc .toc-link.is-active-link,
+#card-toc .toc-link.active {
+  color: var(--sak-accent) !important;
+  border-left-color: var(--sak-accent) !important;
+}
+
+/* ---------------------------------------------------------------- 分页 */
+
+#pagination .page-number,
+#pagination .extend,
+#pagination .prev,
+#pagination .next {
+  border-radius: var(--sak-radius);
+  background: var(--sak-surface);
+  box-shadow: 0 1px 10px -4px rgba(0, 0, 0, .25);
+  color: var(--sak-ink-2);
+  transition: all .2s var(--sak-ease);
+}
+
+#pagination .page-number.current {
+  background: var(--sak-accent);
+  color: #fff;
+}
+
+#pagination .page-number:hover:not(.current),
+#pagination .extend:hover,
+#pagination .prev:hover,
+#pagination .next:hover {
+  color: var(--sak-accent);
+  transform: translateY(-2px);
+}
+
+/* ---------------------------------------------------------------- 页脚 */
+
+#footer {
+  background: transparent;
+  color: var(--sak-ink-3);
+  font-size: .82rem;
+}
+
+#footer .footer-copyright,
+#footer a,
+#footer .framework-info,
+#footer .framework-info a { color: var(--sak-ink-3); }
+#footer a:hover { color: var(--sak-accent); }
+
+/* ---------------------------------------------------- 右下角悬浮按钮 */
+
+#rightside > div > button,
+#rightside > div > a {
+  border-radius: var(--sak-radius);
+  border: none;
+  background: var(--sak-surface);
+  box-shadow: 0 1px 10px -3px rgba(0, 0, 0, .3);
+  color: var(--sak-ink-2);
+  transition: all .2s var(--sak-ease);
+}
+
+#rightside > div > button:hover,
+#rightside > div > a:hover {
+  background: var(--sak-accent);
+  color: #fff;
+}
+
+/* ------------------------------------------------------ 搜索 / 移动端菜单 */
+
+#local-search .search-dialog,
+.search-dialog {
+  border-radius: var(--sak-radius);
+  box-shadow: 0 10px 40px -12px rgba(0, 0, 0, .4);
+}
+
+#local-search-input {
+  border-radius: var(--sak-radius);
+  border: 1px solid #EEE;
+}
+
+#local-search-input:focus { border-color: var(--sak-accent); }
+
+#sidebar #sidebar-menus .menus_item .site-page { color: var(--sak-ink-2); }
+#sidebar #sidebar-menus .menus_item .site-page:hover { color: var(--sak-accent); }
+
+/* ------------------------------------------------------------ 深色模式
+
+   主题右上角有日/夜切换。深色底用 #21252B，是参照站暗色面板的同一组数值。 */
+
+[data-theme="dark"] body { background-color: #18181B; color: rgba(255, 255, 255, .72); }
+
+[data-theme="dark"] {
+  --sak-ink: rgba(255, 255, 255, .9);
+  --sak-ink-2: rgba(255, 255, 255, .72);
+  --sak-ink-3: rgba(255, 255, 255, .45);
+  --sak-bg: #18181B;
+  --sak-surface: #21252B;
+  --sak-accent-soft: rgba(254, 150, 0, .12);
+  --sak-shadow: 0 1px 20px -6px rgba(0, 0, 0, .7);
+  --sak-shadow-hover: 0 5px 16px 2px rgba(0, 0, 0, .55);
+  /* 波浪和页面底色必须一致，否则大图底下会浮出一条白边 */
+  --sak-wave-1: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 60' preserveAspectRatio='none'%3E%3Cpath d='M0,30 C150,58 300,2 600,30 C900,58 1050,2 1200,30 L1200,60 L0,60 Z' fill='%2318181B'/%3E%3C/svg%3E");
+  --sak-wave-2: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 60' preserveAspectRatio='none'%3E%3Cpath d='M0,32 C200,6 400,58 600,32 C800,6 1000,58 1200,32 L1200,60 L0,60 Z' fill='%2318181B'/%3E%3C/svg%3E");
+}
+
+[data-theme="dark"] #page-header.nav-fixed #nav { background: #21252B !important; }
+[data-theme="dark"] #page-header.nav-fixed #nav .site-name { color: rgba(255, 255, 255, .9); }
+
+[data-theme="dark"] #post > #post-info { border-bottom-color: #2E3238; }
+
+[data-theme="dark"] #article-container code:not([class*="hljs"]):not(.hljs) {
+  background: #2A2118;
+  color: #FFB74D;
+}
+
+[data-theme="dark"] figure.highlight,
+[data-theme="dark"] .code-area { border-color: #2E3238; }
+
+[data-theme="dark"] #article-container blockquote,
+[data-theme="dark"] #post .post-copyright {
+  background: #262A30;
+  color: rgba(255, 255, 255, .72);
+}
+
+[data-theme="dark"] #article-container table { border-color: #2E3238; }
+[data-theme="dark"] #article-container table thead { background: #262A30; }
+[data-theme="dark"] #article-container table th,
+[data-theme="dark"] #article-container table td { border-color: #2E3238; }
+[data-theme="dark"] #article-container table tbody tr:hover { background: #262A30; }
+
+[data-theme="dark"] #post .tag_share .post-meta__tags,
+[data-theme="dark"] #article-container .tag-link {
+  border-color: #3A3F46;
+  background: #262A30;
+}
+
+[data-theme="dark"] .tag-cloud a,
+[data-theme="dark"] .category-list a,
+[data-theme="dark"] #page .category-list a,
+[data-theme="dark"] #page .tag-cloud a {
+  border-color: #3A3F46 !important;
+  background: var(--sak-surface);
+}
+
+/* ------------------------------------------------------- 尊重"减少动效"偏好 */
+
+@media (prefers-reduced-motion: reduce) {
+  .hx-wave-1,
+  .hx-wave-2,
+  .hx-hero-avatar img,
+  #aside-content .card-info .avatar-img img,
+  #recent-posts .recent-post-item .post-bg {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------- 小屏 */
+
+@media screen and (max-width: 768px) {
+  /* 手机上 100vh 会被浏览器地址栏顶掉一截，留 70vh 更稳 */
+  #page-header.full_page { height: 70vh; }
+
+  .hx-hero-avatar { width: 84px; height: 84px; margin-bottom: 16px; }
+
+  #page-header.full_page #site-title { font-size: 1.45em; padding: 5px 18px; }
+
+  #nav { padding: 0 16px; }
+
+  #content-inner { padding-top: 20px; }
+
+  #post,
+  #page { padding: 22px 18px 26px; }
+
+  /* 这两条必须带着 #page-header / #post> 前缀，优先级才压得过上面的桌面规则 */
+  #page-header #post-info .post-title { font-size: 1.5rem; }
+  #post > #post-info .post-title { font-size: 1.35rem; }
+
+  #recent-posts .recent-post-item .recent-post-info { padding: 18px 18px 0; }
+  #recent-posts .recent-post-item .article-title { font-size: 1.1rem; }
+
+  #article-container { font-size: .96rem; }
+}

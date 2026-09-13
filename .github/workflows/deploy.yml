@@ -1,0 +1,61 @@
+name: 构建并部署到 GitHub Pages
+
+on:
+  # 推送到 main 分支时自动部署
+  push:
+    branches: [main]
+  # 也可以在 Actions 页面手动点按钮触发
+  workflow_dispatch:
+
+# 部署到 Pages 需要这三个权限
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时间只允许一个部署任务，避免并发写坏站点
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取源码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 构建静态站点
+        run: npm run build
+
+      # 告诉 Pages 服务别再跑 Jekyll，否则下划线开头的目录会被吃掉
+      - name: 关闭 Jekyll 处理
+        run: touch public/.nojekyll
+
+      - name: 配置 Pages
+        uses: actions/configure-pages@v5
+
+      - name: 上传构建产物
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 发布到 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

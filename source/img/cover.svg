@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="cbg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5F7FF"/>
+      <stop offset="100%" stop-color="#E4EAFE"/>
+    </linearGradient>
+    <radialGradient id="cblob" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4F46E5" stop-opacity=".22"/>
+      <stop offset="100%" stop-color="#4F46E5" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="cgrid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#4F46E5" stroke-opacity=".08" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="800" height="500" fill="url(#cbg)"/>
+  <rect width="800" height="500" fill="url(#cgrid)"/>
+  <ellipse cx="620" cy="120" rx="400" ry="300" fill="url(#cblob)"/>
+  <ellipse cx="160" cy="430" rx="340" ry="240" fill="url(#cblob)"/>
+</svg>
