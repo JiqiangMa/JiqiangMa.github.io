@@ -45,6 +45,66 @@ const WAVES = '<div class="hx-waves" aria-hidden="true">' +
   '<div class="hx-wave hx-wave-2"></div>' +
   '</div>';
 
+/* ===== 4. 每次刷新随机换图 ===============================================
+
+   首屏大图走国内动漫随机图接口，每次刷新换一张；接口全部失败时
+   （断网、代理不通、接口挂了）退回本地壁纸，页面永远不会开天窗。
+
+   卡片封面则只在本地封面池里重新洗牌 —— 封面刻意不走接口：
+   接口返回的是 1920x1080 大图（每张 0.5~1.4MB），一页 6 张卡片就是
+   好几 MB，手机上很难受；本地小图（800x500，几十 KB）随便刷。
+   ========================================================================== */
+
+const HERO_FALLBACK = ['/img/hero-1.jpg', '/img/hero-2.jpg', '/img/hero-3.jpg'];
+
+const RANDOM_IMG_APIS = [
+  'https://www.dmoe.cc/random.php',
+  'https://t.alcy.cc/ycy',
+  'https://www.loliapi.com/acg/',
+  'https://t.mwm.moe/pc'
+];
+
+function randomImageScript(heroList, coverList) {
+  return `<script id="hx-random-image">
+(function () {
+  var APIS = ${JSON.stringify(RANDOM_IMG_APIS)};
+  var HERO = ${JSON.stringify(heroList)};
+  var COVER = ${JSON.stringify(coverList)};
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function shuffle(a) {
+    a = a.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function bust(u) { return u + (u.indexOf('?') < 0 ? '?' : '&') + '_r=' + Date.now() + Math.floor(Math.random() * 10000); }
+  function apply(u) {
+    var h = document.querySelector('#page-header.full_page');
+    if (h) { h.style.backgroundImage = 'url("' + u + '")'; }
+  }
+  function tryApi(list, i) {
+    if (i >= list.length) { if (HERO.length) { apply(pick(HERO)); } return; }
+    var url = bust(list[i]);
+    var img = new Image();
+    img.referrerPolicy = 'no-referrer';
+    img.onload = function () { apply(url); };
+    img.onerror = function () { tryApi(list, i + 1); };
+    img.src = url;
+  }
+  function init() {
+    if (document.querySelector('#page-header.full_page')) { tryApi(shuffle(APIS), 0); }
+    var cards = document.querySelectorAll('.post_cover img.post-bg');
+    if (cards.length && COVER.length) {
+      var pool = shuffle(COVER);
+      for (var i = 0; i < cards.length; i++) { cards[i].src = pool[i % pool.length]; }
+    }
+  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
+})();
+</script>`;
+}
 hexo.extend.filter.register('after_render:html', function (html) {
   if (!html.includes('</head>')) return html;
 
@@ -78,5 +138,11 @@ hexo.extend.filter.register('after_render:html', function (html) {
     out = out.replace('<div id="site-info">', `<div id="site-info">${el}`);
   }
 
+  // ---- 4. 每次刷新随机换图 ----
+  if (out.includes('</body>')) {
+    const covers = hexo.theme.config.cover && hexo.theme.config.cover.default_cover;
+    const coverList = Array.isArray(covers) ? covers : (covers ? [covers] : []);
+    out = out.replace('</body>', `${randomImageScript(HERO_FALLBACK, coverList)}\n</body>`);
+  }
   return out;
 });

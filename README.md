@@ -5,7 +5,7 @@
 - **框架**：[Hexo 8](https://hexo.io/)（静态站点生成器）
 - **主题**：[Butterfly 5](https://butterfly.js.org/)（支持标签、分类、本地搜索、目录）
 - **部署**：[GitHub Pages](https://pages.github.com/)，推送后由 GitHub Actions 自动构建发布
-- **视觉**：Sakura 风格布局（参照 [Sakura 主题](https://2heng.xin/theme-sakura/)）——整屏随机摄影壁纸当首屏 + 底部漂移波浪 + 10px 大圆角卡片 + 暖橙 `#FE9600` 强调色
+- **视觉**：Sakura 风格布局（参照 [Sakura 主题](https://2heng.xin/theme-sakura/)）——整屏随机二次元壁纸当首屏（每次刷新换一张） + 底部漂移波浪 + 10px 大圆角卡片 + 暖橙 `#FE9600` 强调色
 
 ---
 
@@ -29,6 +29,8 @@
     └── img/                         # 图片资源
         ├── avatar.svg               # 头像（首屏和侧边栏都用它）
         ├── favicon.svg              # 网站图标
+        ├── hero-1..3.jpg            # 首屏壁纸兜底（接口挂了或断网时随机用一张）
+        ├── cover-1..12.jpg          # 文章封面池（每次刷新随机分配给卡片）
         ├── cover-fallback.svg       # 封面加载失败时的兜底图
         └── avatar-fallback.svg      # 头像加载失败时的兜底图
 ```
@@ -164,10 +166,21 @@ git push -u origin main
 换成照片也支持：把图片丢进去，改 `_config.butterfly.yml` 里 `avatar.img` 的路径。
 
 **首屏的壁纸是哪来的？**
-来自 [Picsum](https://picsum.photos/)（真实摄影，安全不露），所以仓库里不用存大图。
-接口地址写在 `_config.butterfly.yml` 的 `index_img` / `default_top_img` / `cover.default_cover` 里。
-想换成固定的图，把那些 URL 换成自己的图片地址即可。
-接口挂掉时会自动显示 `cover-fallback.svg` / `avatar-fallback.svg` 兜底，不会出现裂图。
+每次刷新都不一样。`scripts/inject-theme-assets.js` 会往页面注入一小段脚本，按随机顺序尝试这几个
+国内动漫随机图接口：`https://www.dmoe.cc/random.php`、`https://t.alcy.cc/ycy`、
+`https://www.loliapi.com/acg/`、`https://t.mwm.moe/pc`，第一个加载成功的就拿来当首屏。
+全部失败（断网、代理不通、接口挂了）就退回 `source/img/hero-1..3.jpg` 里的随机一张，页面不会开天窗。
+要增删接口，改那个脚本顶部的 `RANDOM_IMG_APIS`。
+
+**文章封面怎么定的？**
+`_config.butterfly.yml` 的 `cover.default_cover` 是一个 12 张本地图的池子，刷新页面时脚本会重新洗牌分配。
+封面刻意不走接口：接口返回的是 1920x1080 大图（每张 0.5~1.4MB），一页 6 张卡片就是好几 MB。
+想加封面：图片丢进 `source/img/`，再往 `default_cover` 下面加一行。
+
+**图标或样式偶尔加载不出来？**
+主题默认从 `cdn.jsdelivr.net` 取图标和脚本，国内经常不通。现在 Font Awesome 图标已经自托管在
+`source/pluginsSrc/fontawesome/`，不走任何 CDN；剩下两个小脚本（typed.js、infinitegrid）走
+`_config.butterfly.yml` 里 `CDN.custom_format` 配的 `fastly.jsdelivr.net`（jsdelivr 的 Fastly 边缘，实测国内可达）。
 
 **底部的波浪是怎么做的？**
 Butterfly 没有这个功能，是 `scripts/inject-theme-assets.js` 往首页横幅里插了两个 `<div>`，

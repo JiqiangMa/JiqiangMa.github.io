@@ -65,13 +65,13 @@ avatar:
 disable_top_img: false
 
 # If the banner of page not setting, it will show the default_top_img
-# 用 Picsum 的真实摄影（风景/生活，安全不露），固定 seed 便于浏览器缓存。
-# 实测可达，但比二次元接口慢（大图首载约 4~6 秒），介意速度就把值改成 /img/banner.svg。
-# 加载失败时 custom.css 里有渐变兜底，不会开天窗。
-default_top_img: https://picsum.photos/seed/blog-banner/1920/1000
+# 首屏壁纸：scripts/inject-theme-assets.js 会在每次刷新时从国内动漫图接口随机取一张。
+# 下面这两行的本地图是"接口挂掉/断网"时的兜底，脚本会从 source/img/hero-1..3.jpg 里随机挑一张。
+# 不想用随机壁纸：把这两行改成固定图片 URL 即可，custom.css 里有渐变兜底不会开天窗。
+default_top_img: /img/hero-1.jpg
 
 # The banner image of index page
-index_img: https://picsum.photos/seed/blog-banner/1920/1000
+index_img: /img/hero-1.jpg
 
 # The banner image of archive page
 archive_img:
@@ -105,18 +105,24 @@ cover:
   index_enable: true
   aside_enable: true
   archives_enable: true
-  # 每篇文章自动分配一张随机封面（Picsum 真实摄影，安全不露）。
-  # 为什么要写 6 条看着重复的地址：同一个 URL 浏览器只会缓存一次，
-  # 全站共用一条的话所有卡片会显示同一张图。带不同 seed，
-  # 每条就是独立的缓存槽，卡片之间才会各是各的图。小图（800x500）实测约 1 秒。
+  # 文章封面池（source/img/cover-1..12.jpg）。刷新页面时脚本会重新随机分配。
+  # 为什么写这么多条：主题按顺序取用，卡片之间才会各是各的图。
+  # 只写一条的话所有卡片都是同一张图。
+  # 想加封面：图片丢进 source/img/，再在下面加一行即可。
   # 想让文章用固定封面：在文章 front-matter 里写 cover: /img/xxx.jpg
   default_cover:
-    - https://picsum.photos/seed/cover1/800/500
-    - https://picsum.photos/seed/cover2/800/500
-    - https://picsum.photos/seed/cover3/800/500
-    - https://picsum.photos/seed/cover4/800/500
-    - https://picsum.photos/seed/cover5/800/500
-    - https://picsum.photos/seed/cover6/800/500
+    - /img/cover-1.jpg
+    - /img/cover-2.jpg
+    - /img/cover-3.jpg
+    - /img/cover-4.jpg
+    - /img/cover-5.jpg
+    - /img/cover-6.jpg
+    - /img/cover-7.jpg
+    - /img/cover-8.jpg
+    - /img/cover-9.jpg
+    - /img/cover-10.jpg
+    - /img/cover-11.jpg
+    - /img/cover-12.jpg
 
 # Replace Broken Images
 error_img:
@@ -1095,16 +1101,16 @@ CDN:
   # Note: Dev version can only use 'local' for internal scripts
   # Note: When setting third-party scripts to 'local', you need to install hexo-butterfly-extjs
   internal_provider: local
-  third_party_provider: jsdelivr
-
+  third_party_provider: custom
   # Add version number to url, true or false
   version: true
 
   # Custom format
   # For example: https://cdn.staticfile.org/${cdnjs_name}/${version}/${min_cdnjs_file}
-  custom_format:
-
+  custom_format: 'https://fastly.jsdelivr.net/npm/${name}@${version}/${min_file}'
   option:
+    # 图标本地自托管（source/pluginsSrc），不依赖任何 CDN
+    fontawesome: /pluginsSrc/fontawesome/css/all.min.css
     # abcjs_basic_js:
     # activate_power_mode:
     # algolia_js:
