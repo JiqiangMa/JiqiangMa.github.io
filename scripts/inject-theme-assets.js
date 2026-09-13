@@ -47,7 +47,8 @@ const WAVES = '<div class="hx-waves" aria-hidden="true">' +
 
 /* ===== 4. 每次刷新随机换图 ===============================================
 
-   首屏大图走国内动漫随机图接口，每次刷新换一张；接口全部失败时
+   横幅大图走国内动漫随机图接口，每次刷新换一张：首页 + 归档/标签/分类/关于都用它，
+   文章页除外（文章页用文章自己的封面，不能乱换）。接口全部失败时
    （断网、代理不通、接口挂了）退回本地壁纸，页面永远不会开天窗。
 
    卡片封面则只在本地封面池里重新洗牌 —— 封面刻意不走接口：
@@ -95,7 +96,7 @@ function randomImageScript(heroList, coverList) {
   }
   function bust(u) { return u + (u.indexOf('?') < 0 ? '?' : '&') + '_r=' + Date.now() + Math.floor(Math.random() * 10000); }
   function apply(u) {
-    var h = document.querySelector('#page-header.full_page');
+    var h = document.querySelector('#page-header:not(.post-bg)');
     if (h) { h.style.backgroundImage = 'url("' + u + '")'; }
   }
   function tryApi(list, i) {
@@ -108,7 +109,7 @@ function randomImageScript(heroList, coverList) {
     img.src = url;
   }
   function init() {
-    if (document.querySelector('#page-header.full_page')) { tryApi(shuffle(APIS), 0); }
+    if (document.querySelector('#page-header:not(.post-bg)')) { tryApi(shuffle(APIS), 0); }
     var cards = document.querySelectorAll('.post_cover img.post-bg');
     if (cards.length && COVER.length) {
       var pool = shuffle(COVER);
