@@ -3,7 +3,7 @@ title: 写作模板：Markdown 与 Front-matter 速查
 date: 2026-09-10 10:30:00
 updated: 2026-09-10 10:30:00
 categories:
-  - 使用说明
+  - 工程杂记
 tags:
   - Markdown
   - Hexo
