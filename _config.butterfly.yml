@@ -188,8 +188,9 @@ subtitle:
   source: false
   # If you close the typewriter effect, the subtitle will only show the first line of sub
   sub:
-    - 每天进步一点点
-    - Stay hungry, stay foolish.
+    - 早上敲代码，晚上整理笔记
+    - BIP 客开 / Java 后端 / 工程实践
+    - 日拱一卒，功不唐捐
 
 # Article layout on the homepage
 # 1: Cover on the left, info on the right
@@ -319,7 +320,7 @@ aside:
       link: https://github.com/JiqiangMa
   card_announcement:
     enable: true
-    content: 记录对技术的理解，以及每天学到的新东西。
+    content: 「朝花夕拾」的码版：白天写 BIP 客开，晚上整理笔记。
   card_recent_post:
     enable: true
     # If set 0 will show all
