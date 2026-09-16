@@ -56,8 +56,6 @@ const WAVES = '<div class="hx-waves" aria-hidden="true">' +
    好几 MB，手机上很难受；本地小图（800x500，几十 KB）随便刷。
    ========================================================================== */
 
-const HERO_FALLBACK = ['/img/hero-1.jpg', '/img/hero-2.jpg', '/img/hero-3.jpg'];
-
 const RANDOM_IMG_APIS = [
   'https://www.dmoe.cc/random.php',
   'https://t.alcy.cc/ycy',
@@ -65,19 +63,42 @@ const RANDOM_IMG_APIS = [
   'https://t.mwm.moe/pc'
 ];
 
-/* 封面池：source/img/covers/ 里的图，构建时扫目录拿到清单。
-   想加封面就往那个目录丢图（jpg/png/webp 都行），重新构建即可生效。 */
-function readCoverFiles() {
-  const dir = path.join(hexo.base_dir, 'source', 'img', 'covers');
+/* 图片池：构建时扫 source/img/<子目录>/，拿到图片清单。
+   想加图就往对应目录丢图（jpg/png/webp 都行），重新构建即可生效。 */
+function readImageDir(sub) {
+  const dir = path.join(hexo.base_dir, 'source', 'img', sub);
   try {
     return fs.readdirSync(dir)
       .filter(file => /\.(jpe?g|png|webp|avif|gif)$/i.test(file))
       .sort()
-      .map(file => `/img/covers/${file}`);
+      .map(file => `/img/${sub}/${file}`);
   } catch (err) {
-    hexo.log.warn(`[theme-assets] 读取封面目录失败 ${dir}：${err.message}`);
+    hexo.log.warn(`[theme-assets] 读取图片目录失败 ${dir}：${err.message}`);
     return [];
   }
+}
+
+function readCoverFiles() {
+  return readImageDir('covers');
+}
+
+function readHeroFiles() {
+  return readImageDir('heroes');
+}
+
+/* 放在 <head> 里的"先随机"脚本：页面渲染前就把随机壁纸定下来，
+   避免出现"先显示固定的一张、等接口图回来再换"。 */
+function heroRandomHeadScript(heroList) {
+  return `<script id="hx-hero-random">
+(function () {
+  var HERO = ${JSON.stringify(heroList)};
+  if (!HERO.length) return;
+  var url = HERO[Math.floor(Math.random() * HERO.length)];
+  var style = document.createElement('style');
+  style.textContent = '#page-header:not(.post-bg){background-image:url("' + url + '") !important}';
+  (document.head || document.documentElement).appendChild(style);
+})();
+</script>`;
 }
 function randomImageScript(heroList, coverList) {
   return `<script id="hx-random-image">
@@ -97,7 +118,7 @@ function randomImageScript(heroList, coverList) {
   function bust(u) { return u + (u.indexOf('?') < 0 ? '?' : '&') + '_r=' + Date.now() + Math.floor(Math.random() * 10000); }
   function apply(u) {
     var h = document.querySelector('#page-header:not(.post-bg)');
-    if (h) { h.style.backgroundImage = 'url("' + u + '")'; }
+    if (h) { h.style.setProperty('background-image', 'url("' + u + '")', 'important'); }
   }
   function tryApi(list, i) {
     if (i >= list.length) { if (HERO.length) { apply(pick(HERO)); } return; }
@@ -155,12 +176,16 @@ hexo.extend.filter.register('after_render:html', function (html) {
 
   // ---- 4. 每次刷新随机换图 ----
   if (out.includes('</body>')) {
+    const heroList = readHeroFiles();
     const dirCovers = readCoverFiles();
     const cfgCovers = hexo.theme.config.cover && hexo.theme.config.cover.default_cover;
     const coverList = dirCovers.length
       ? dirCovers
       : (Array.isArray(cfgCovers) ? cfgCovers : (cfgCovers ? [cfgCovers] : []));
-    out = out.replace('</body>', `${randomImageScript(HERO_FALLBACK, coverList)}\n</body>`);
+    if (heroList.length && out.includes('</head>')) {
+      out = out.replace('</head>', `${heroRandomHeadScript(heroList)}\n</head>`);
+    }
+    out = out.replace('</body>', `${randomImageScript(heroList, coverList)}\n</body>`);
   }
   return out;
 });

@@ -29,7 +29,7 @@
     └── img/                         # 图片资源
         ├── avatar.svg               # 头像（首屏和侧边栏都用它）
         ├── favicon.svg              # 网站图标
-        ├── hero-1..3.jpg            # 首屏壁纸兜底（接口挂了或断网时随机用一张）
+        ├── heroes/                   # ★ 壁纸池（当前 34 张，渲染前就随机取一张）
         ├── covers/                   # ★ 封面池（当前 45 张，丢图进去即生效）
         ├── cover-fallback.svg       # 封面加载失败时的兜底图
         └── avatar-fallback.svg      # 头像加载失败时的兜底图
@@ -180,8 +180,12 @@ git push -u origin main
 每次刷新都不一样。`scripts/inject-theme-assets.js` 会往页面注入一小段脚本，按随机顺序尝试这几个
 国内动漫随机图接口：`https://www.dmoe.cc/random.php`、`https://t.alcy.cc/ycy`、
 `https://www.loliapi.com/acg/`、`https://t.mwm.moe/pc`，第一个加载成功的就拿来当首屏。
-全部失败（断网、代理不通、接口挂了）就退回 `source/img/hero-1..3.jpg` 里的随机一张，页面不会开天窗。
+        ├── heroes/                   # ★ 壁纸池（当前 34 张，渲染前就随机取一张）
 要增删接口，改那个脚本顶部的 `RANDOM_IMG_APIS`。
+
+更关键的是"先随机"这一步：脚本会往 `<head>` 里塞一小段内联 JS，页面渲染**之前**就从 `source/img/heroes/`
+随机挑一张当壁纸（用 `!important` 覆盖服务端写死的那张），所以不会再出现"先显示固定一张、等一下才被换掉"。
+接口图加载成功后，才会把它替换成线上随机图。加壁纸：把图丢进 `source/img/heroes/`（建议 1600x900 左右），不用改配置。
 
 **文章封面怎么定的？**
 封面池就是 `source/img/covers/` 这个目录（当前 45 张），构建时脚本扫目录拿到清单，每次刷新页面都会重新随机分配。
