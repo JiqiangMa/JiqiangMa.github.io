@@ -64,6 +64,44 @@ description: 显示在首页卡片和搜索结果里的摘要
 
 `**粗体**`、`*斜体*`、`~~删除线~~`、`\`行内代码\``。
 
+### 给文字上色
+
+三种写法，从省事到好维护：
+
+**1）主题自带的小标签**（带底色，适合标“重要/注意/结论”）：
+
+````markdown
+{% label 重要 orange %}
+````
+
+效果：{% label 重要 orange %}　{% label 注意 red %}　{% label 结论 green %}
+
+可选颜色：`blue` `pink` `red` `purple` `orange` `green`，不写就是灰色。
+
+**2）行内 HTML —— 给正文里某几个字变色**：
+
+```html
+把 <span style="color:#FE9600">关键结论</span> 单独标出来。
+```
+
+效果：把 <span style="color:#FE9600;font-weight:600">关键结论</span> 单独标出来。
+
+**3）语义化类（推荐）**：颜色定义在 `source/css/custom.css` 的“正文强调工具类”一节，文章里只写类名，以后统一改色：
+
+```html
+<span class="c-accent">重点</span>
+<span class="c-warn">风险</span>
+<span class="c-ok">正常</span>
+<span class="c-muted">次要说明</span>
+```
+
+效果：<span class="c-accent">重点</span>　<span class="c-warn">风险</span>　<span class="c-ok">正常</span>　<span class="c-muted">次要说明</span>
+
+> **两个注意点**
+>
+> 1. 在 Markdown 里混写 HTML 时，标签要**顶格写、前后各空一行**，否则标签里面的内容不会被解析。
+> 2. 颜色别用太多，一篇里 1~2 处重点就够了；想统一调色，改 `custom.css` 顶部的 `--sak-*` 变量和那几个类即可。
+
 ### 列表与表格
 
 | 语法 | 效果 | 常用场景 |

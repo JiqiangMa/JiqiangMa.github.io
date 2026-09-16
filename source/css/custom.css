@@ -881,6 +881,18 @@ figure.highlight table,
   #article-container { font-size: .96rem; }
 }
 
+/* ------------------------------------------------------- 正文强调工具类
+   文章里这样用： <span class="c-accent">重点</span>
+   --sak-accent 就是站点主色，改配色只改顶部变量即可。 */
+
+.c-accent { color: var(--sak-accent); font-weight: 600; }
+.c-warn { color: #D93025; font-weight: 600; }
+.c-ok { color: #1A7F37; font-weight: 600; }
+.c-muted { color: var(--sak-ink-3); }
+
+/* 暗色模式下换成亮一点的红绿，浅底色的红绿在深底上会糊 */
+[data-theme="dark"] .c-warn { color: #FF7B72; }
+[data-theme="dark"] .c-ok { color: #7EE787; }
 /* ------------------------------------------------------ 手机端细节（<768px） */
 /* 上面那条 768px 规则管的是首屏高度和头像尺寸，这里补波浪、站名、
    卡片、正文与防溢出。放在文件末尾，同优先级下会覆盖前面的桌面规则。 */
