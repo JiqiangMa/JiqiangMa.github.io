@@ -699,10 +699,14 @@ figure.highlight table,
 #card-toc .toc-link { color: var(--sak-ink-2); font-size: .85rem; }
 #card-toc .toc-link:hover { color: var(--sak-accent); }
 
+/* 主题给 active 加的是「橙底 + 白字」，这里原来用 !important 把文字又改成橙色，
+   结果橙底橙字 → 当前浏览的那一行文字看不见。保持白字即可。
+   顺带把 is-active-link 也一起给上底色，避免只有这个类时白字落在白底上。 */
+
 #card-toc .toc-link.is-active-link,
 #card-toc .toc-link.active {
-  color: var(--sak-accent) !important;
-  border-left-color: var(--sak-accent) !important;
+  background: var(--sak-accent) !important;
+  color: #fff !important;
 }
 
 /* ---------------------------------------------------------------- 分页 */
