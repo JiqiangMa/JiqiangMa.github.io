@@ -885,16 +885,19 @@ figure.highlight table,
   #article-container { font-size: .96rem; }
 }
 
-/* ------------------------------------------------------- 正文强调工具类
-   文章里这样用： <span class="c-accent">重点</span>
-   --sak-accent 就是站点主色，改配色只改顶部变量即可。 */
+/* ------------------------------------------------------- 正文文字变色工具类
+   只改文字颜色，不加任何底色。
+   文章里这样用： <span class="c-blue">蓝色文字</span>
+   c-accent 用的是站点主色，想统一改配色只改顶部 --sak-* 变量即可。 */
 
-.c-accent { color: var(--sak-accent); font-weight: 600; }
-.c-warn { color: #D93025; font-weight: 600; }
-.c-ok { color: #1A7F37; font-weight: 600; }
-.c-muted { color: var(--sak-ink-3); }
+.c-accent { color: var(--sak-accent); font-weight: 600; }   /* 站点主色（橙） */
+.c-blue { color: #1E6FEB; font-weight: 600; }               /* 蓝 */
+.c-warn { color: #D93025; font-weight: 600; }               /* 红（风险） */
+.c-ok { color: #1A7F37; font-weight: 600; }                 /* 绿（正常） */
+.c-muted { color: var(--sak-ink-3); }                       /* 灰（次要） */
 
-/* 暗色模式下换成亮一点的红绿，浅底色的红绿在深底上会糊 */
+/* 暗色模式下换成亮一点的，浅底色的蓝/红/绿在深底上会糊 */
+[data-theme="dark"] .c-blue { color: #6CB6FF; }
 [data-theme="dark"] .c-warn { color: #FF7B72; }
 [data-theme="dark"] .c-ok { color: #7EE787; }
 /* ------------------------------------------------------ 手机端细节（<768px） */

@@ -88,9 +88,29 @@ permalink: /2026/09/16/ship-info-rule/
 
 ### 给文字上色
 
-三种写法，从省事到好维护：
+先分清两件事：**让文字本身变色**（比如蓝色）用下面 1、2 两种；**给文字套一个带底色的小标签**是第 3 种，那叫"色块"，不是文字变色。
 
-**1）主题自带的小标签**（带底色，适合标“重要/注意/结论”）：
+**1）行内 HTML —— 最直接**：
+
+```html
+把 <span style="color:#1E6FEB">关键结论</span> 标成蓝色。
+```
+
+效果：把 <span style="color:#1E6FEB;font-weight:600">关键结论</span> 标成蓝色。
+
+**2）语义化类（推荐）**：颜色定义在 `source/css/custom.css` 的"正文文字变色工具类"一节，文章里只写类名，以后统一改色：
+
+```html
+<span class="c-accent">站点主色（橙）</span>
+<span class="c-blue">蓝色</span>
+<span class="c-warn">红色（风险）</span>
+<span class="c-ok">绿色（正常 / 通过）</span>
+<span class="c-muted">灰色（次要说明）</span>
+```
+
+效果：<span class="c-accent">站点主色</span>　<span class="c-blue">蓝色</span>　<span class="c-warn">红色</span>　<span class="c-ok">绿色</span>　<span class="c-muted">灰色</span>
+
+**3）带底色的小标签**（这一种是色块，不是文字变色）：
 
 ````markdown
 {% label 重要 orange %}
@@ -100,30 +120,10 @@ permalink: /2026/09/16/ship-info-rule/
 
 可选颜色：`blue` `pink` `red` `purple` `orange` `green`，不写就是灰色。
 
-**2）行内 HTML —— 给正文里某几个字变色**：
-
-```html
-把 <span style="color:#FE9600">关键结论</span> 单独标出来。
-```
-
-效果：把 <span style="color:#FE9600;font-weight:600">关键结论</span> 单独标出来。
-
-**3）语义化类（推荐）**：颜色定义在 `source/css/custom.css` 的“正文强调工具类”一节，文章里只写类名，以后统一改色：
-
-```html
-<span class="c-accent">重点</span>
-<span class="c-warn">风险</span>
-<span class="c-ok">正常</span>
-<span class="c-muted">次要说明</span>
-```
-
-效果：<span class="c-accent">重点</span>　<span class="c-warn">风险</span>　<span class="c-ok">正常</span>　<span class="c-muted">次要说明</span>
-
 > **两个注意点**
 >
 > 1. 在 Markdown 里混写 HTML 时，标签要**顶格写、前后各空一行**，否则标签里面的内容不会被解析。
-> 2. 颜色别用太多，一篇里 1~2 处重点就够了；想统一调色，改 `custom.css` 顶部的 `--sak-*` 变量和那几个类即可。
-
+> 2. 颜色别用太多，一篇里 1~2 处重点就够了；想统一调色，改 `custom.css` 里那几个类即可。
 ### 列表与表格
 
 | 语法 | 效果 | 常用场景 |
