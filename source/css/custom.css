@@ -880,3 +880,52 @@ figure.highlight table,
 
   #article-container { font-size: .96rem; }
 }
+
+/* ------------------------------------------------------ 手机端细节（<768px） */
+/* 上面那条 768px 规则管的是首屏高度和头像尺寸，这里补波浪、站名、
+   卡片、正文与防溢出。放在文件末尾，同优先级下会覆盖前面的桌面规则。 */
+
+@media screen and (max-width: 768px) {
+  html { -webkit-text-size-adjust: 100%; }
+
+  /* 波浪矮一点，别吃掉小屏幕的一半 */
+  .hx-waves { height: 52px; }
+  .hx-wave-1 { height: 46px; background-size: 1200px 46px; }
+  .hx-wave-2 { height: 32px; background-size: 1200px 32px; }
+
+  /* 站名胶囊：字小一档、内边距收紧 */
+  #page-header.full_page #site-title { font-size: 1.15em; padding: 4px 14px; }
+  #page-header.full_page #site-subtitle { font-size: .85rem; }
+
+  /* 文章卡片：圆角小一点，缩略图别太高 */
+  #recent-posts .recent-post-item { margin-bottom: 18px; border-radius: 8px; }
+  #recent-posts .recent-post-item .post_cover { max-height: 180px; }
+  #recent-posts .recent-post-item .recent-post-info { padding: 0 16px; }
+  #recent-posts .recent-post-item:hover .post-bg { transform: scale(1.06); }
+
+  /* 正文：标题和字号各收一档 */
+  #article-container h1 { font-size: 1.3rem; }
+  #article-container h2 { font-size: 1.15rem; }
+  #article-container h3 { font-size: 1.02rem; }
+  #article-container p { line-height: 1.75; }
+
+  /* 手机上目录卡片很占地方，藏掉 */
+  #card-toc { display: none !important; }
+
+  /* 防溢出：代码块、表格、长链接、图片 */
+  #article-container .highlight,
+  #article-container pre { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  #article-container table { display: block; max-width: 100%; overflow-x: auto; }
+  #article-container img { max-width: 100%; height: auto; }
+  #article-container a { word-break: break-word; }
+}
+
+/* ------------------------------------------- 小屏（<480px，多数手机竖屏） */
+
+@media screen and (max-width: 480px) {
+  #page-header.full_page { height: 62vh; }
+  .hx-hero-avatar { width: 72px; height: 72px; margin-bottom: 12px; }
+  #page-header.full_page #site-title { font-size: 1.05em; padding: 3px 12px; }
+  #recent-posts .recent-post-item .post_cover { max-height: 150px; }
+  #recent-posts .recent-post-item .article-title { font-size: 1rem; }
+}
